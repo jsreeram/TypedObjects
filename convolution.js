@@ -1,32 +1,6 @@
-/*
- * Copyright (c) 2011, Intel Corporation
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met:
- *
- * - Redistributions of source code must retain the above copyright notice, 
- *   this list of conditions and the following disclaimer.
- * - Redistributions in binary form must reproduce the above copyright notice, 
- *   this list of conditions and the following disclaimer in the documentation 
- *   and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
- * THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
-/*  Convolution on an image type with a fixed 5x5 filter
- *  Author: Jaswanth Sreeram
- */
+/* Convolution on an image type with a fixed 5x5 filter
+*  Author: Jaswanth Sreeram
+*/
 
 
 var Convolution = function(input, output, width, height, channels) {
@@ -77,8 +51,24 @@ function getTypedObjectImage(w, h, c) {
     return img;
 }
 
+function getJSArrayImage(w, h, c) {
+    var img = [];
+    for(var i = 0; i < w; i++) {
+        img[i] = [];
+        for(var j = 0; j < h; j++) {
+            img[i][j] = [];
+            for(var k = 0; k < c; k++) {
+                img[i][j][k] = i+j+k;
+            }
+        }
+    }
+    return img;
+}
+
+
 function runTest() {
     var w = 50; var h = 50; var c = 4; var numIters = 5;
+
     var typedObject_input =  getTypedObjectImage(w, h, c);
     var typedObject_output = getTypedObjectImage(w, h, 1);
     var cTO = new Convolution(typedObject_input, typedObject_output, w, h, c);
@@ -88,8 +78,19 @@ function runTest() {
     for(var i = 0; i < numIters; i++) {
         cTO.run();
     }
-    print("Time elapsed for " + numIters + " runs =  " + (Date.now() - start_time) + " ms");
-    //print(cTO.output[2][3][0]);
+    print("[Typed Objects] Time elapsed for " + numIters + " runs =  " + (Date.now() - start_time) + " ms");
+
+    var jsArray_input = getJSArrayImage(w, h, c);
+    var jsArray_output = getJSArrayImage(w, h, c);
+    var jsTO = new Convolution(jsArray_input, jsArray_output, w, h, c);
+    //Warmup
+    jsTO.run();
+    start_time = Date.now();
+    for(var i = 0; i < numIters; i++) {
+        jsTO.run();
+    }
+    print("[JS Arrays] Time elapsed for " + numIters + " runs =  " + (Date.now() - start_time) + " ms");
+    print(cTO.output[2][3][0] + " == " + jsTO.output[2][3][0]);
 }
 
 runTest();
